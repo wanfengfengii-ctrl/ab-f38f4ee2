@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    image: collaborative-pixel-mask:latest
+    environment:
+      # Container-internal port; the host mapping is what APP_PORT controls.
+      UVICORN_PORT: "8000"
+    ports:
+      # Host port comes from the environment (APP_PORT), default 8080.
+      - "${APP_PORT:-8080}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status==200 else 1)"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+    restart: unless-stopped
+
+  verify:
+    build: .
+    image: collaborative-pixel-mask:latest
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      APP_BASE_URL: "http://app:8000"
+    entrypoint: ["sh", "/srv/verify/entrypoint.sh"]
+    restart: "no"
