@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    image: mask-collab-service
+    environment:
+      PORT: 3000
+    ports:
+      # Host port is configurable via the APP_PORT environment variable.
+      - "${APP_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+
+  # One-shot verification: waits until app is healthy, runs code tests, the
+  # build check and the disjoint-merge smoke test, then exits with a status
+  # code that reports the result.
+  verify:
+    build: .
+    image: mask-collab-service
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      MASK_BASE_URL: "http://app:3000"
+    command: ["node", "scripts/verify.js"]
+    restart: "no"

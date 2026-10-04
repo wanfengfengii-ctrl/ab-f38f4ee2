@@ -1,0 +1,16 @@
+{
+  "name": "mask-collab-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Collaborative pixel-mask revision service with optimistic disjoint patch merging",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test",
+    "smoke": "node scripts/smoke.js",
+    "verify": "node scripts/verify.js"
+  }
+}
